@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المسابقة الإسلامية التاريخية</title>
+    <style>
+        body {
+            background-color: #1e3a5f;
+            font-family: 'Tajawal', sans-serif;
+            text-align: center;
+            padding: 20px;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+            color: #333;
+        }
+        h1 {
+            font-size: 32px;
+            color: #1e3a5f;
+            margin-bottom: 20px;
+        }
+        #team-scores {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .team-score {
+            flex: 1;
+            padding: 10px;
+            margin: 0 10px;
+            border-radius: 8px;
+            font-size: 24px;
+        }
+        #team1-score {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #team2-score {
+            background-color: #2196F3;
+            color: white;
+        }
+        #current-team {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #1e3a5f;
+        }
+        #question {
+            font-size: 28px;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        #options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .option-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            word-wrap: break-word;
+        }
+        .option-btn:hover {
+            background-color: #e68900;
+        }
+        .option-btn.correct {
+            background-color: #4CAF50;
+        }
+        .option-btn.incorrect {
+            background-color: #f44336;
+        }
+        #next-btn {
+            background-color: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        #next-btn:hover {
+            background-color: #2c5383;
+        }
+        #game-end {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        #winner {
+            font-size: 36px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="team-scores">
+            <div id="team1-score" class="team-score">الفريق الأول: 0</div>
+            <div id="team2-score" class="team-score">الفريق الثاني: 0</div>
+        </div>
+        <div id="current-team">دور الفريق الأول</div>
+        <div id="quiz-section">
+            <h1>المسابقة الإسلامية التاريخية</h1>
+            <p id="question">السؤال هنا</p>
+            <div id="options"></div>
+            <button id="next-btn" onclick="nextQuestion()">التالي</button>
+        </div>
+        <div id="game-end">
+            <h1>نهاية المسابقة</h1>
+            <div id="winner">الفائز: </div>
+            <button onclick="restartGame()">إعادة اللعب</button>
+        </div>
+    </div>
+
+    <script>
+        let questions = [
+            { q: "من لقب بـ أول سفراء الإسلام؟", options: ["مصعب بن عمير", "بلال بن رباح", "سعد بن أبي وقاص", "عبد الله بن عمر"], a: "مصعب بن عمير" },
+            { q: "من كان يُعرف بـ الباحث عن الحقيقة؟", options: ["سلمان الفارسي", "أبو ذر الغفاري", "حذيفة بن اليمان", "خباب بن الأرت"], a: "سلمان الفارسي" },
+            { q: "من هو زعيم المعارضة وعدو الثروات؟", options: ["أبو ذر الغفاري", "سعيد بن عامر", "عمار بن ياسر", "المقداد بن عمرو"], a: "أبو ذر الغفاري" },
+            { q: "من لُقب بـ الساخر من الأهوال؟", options: ["بلال بن رباح", "عبد الله بن مسعود", "عبد الرحمن بن عوف", "صهيب بن سنان"], a: "بلال بن رباح" },
+            { q: "من هو المثابر والأواب؟", options: ["عبد الله بن عمر", "سعد بن أبي وقاص", "خالد بن الوليد", "عمرو بن العاص"], a: "عبد الله بن عمر" },
+            { q: "من وُصف بـ الأسد في براثنه؟", options: ["سعد بن أبي وقاص", "حمزة بن عبد المطلب", "خالد بن الوليد", "الزبير بن العوام"], a: "سعد بن أبي وقاص" },
+            { q: "من اشتهر بـ ربح البيع يا أبا يحيى؟", options: ["صهيب بن سنان", "معاذ بن جبل", "عبد الرحمن بن عوف", "أبو عبيدة بن الجراح"], a: "صهيب بن سنان" },
+            { q: "من كان أعلم الصحابة بالحلال والحرام؟", options: ["معاذ بن جبل", "زيد بن ثابت", "أبي بن كعب", "عبد الله بن عمرو"], a: "معاذ بن جبل" },
+            { q: "من هو أول فرسان الإسلام؟", options: ["المقداد بن عمرو", "خالد بن الوليد", "الزبير بن العوام", "سعد بن أبي وقاص"], a: "المقداد بن عمرو" },
+            { q: "من اشتهر بـ العظمة تحت الاسمال؟", options: ["سعيد بن عامر", "عمار بن ياسر", "عبد الله بن مسعود", "خباب بن الأرت"], a: "سعيد بن عامر" },
+            { q: "من لُقب بـ أسد الله وسيد الشهداء؟", options: ["حمزة بن عبد المطلب", "خالد بن الوليد", "الزبير بن العوام", "طلحة بن عبيد الله"], a: "حمزة بن عبد المطلب" },
+            { q: "من كان أول صادح بالقرآن؟", options: ["عبد الله بن مسعود", "أبي بن كعب", "زيد بن ثابت", "عمر بن الخطاب"], a: "عبد الله بن مسعود" },
+            { q: "من وُصف بـ عدو النفاق وصديق الوضوح؟", options: ["حذيفة بن اليمان", "عمار بن ياسر", "سلمان الفارسي", "المقداد بن عمرو"], a: "حذيفة بن اليمان" },
+            { q: "من لُقب بـ رجل من الجنة؟", options: ["عمار بن ياسر", "خباب بن الأرت", "بلال بن رباح", "سعد بن معاذ"], a: "عمار بن ياسر" },
+            { q: "من كان نقيباً في حزب الله؟", options: ["عبادة بن الصامت", "أسيد بن خضير", "سعد بن عبادة", "البراء بن مالك"], a: "عبادة بن الصامت" },
+            { q: "من هو أستاذ فن الفداء؟", options: ["خباب بن الأرت", "عبد الله بن مسعود", "بلال بن رباح", "خبيب بن عدي"], a: "خباب بن الأرت" },
+            { q: "من لُقب بـ أمين هذه الأمة؟", options: ["أبو عبيدة بن الجراح", "عمر بن الخطاب", "أبو بكر الصديق", "عثمان بن عفان"], a: "أبو عبيدة بن الجراح" },
+            { q: "من وُصف بـ راهب صومعته الحياة؟", options: ["عثمان بن مظعون", "زيد بن حارثة", "خالد بن سعيد", "أبو أيوب الأنصاري"], a: "عثمان بن مظعون" },
+            { q: "من كان أشبه خلقاً وخلقاً للرسول؟", options: ["جعفر بن أبي طالب", "زيد بن حارثة", "علي بن أبي طالب", "العباس بن عبد المطلب"], a: "جعفر بن أبي طالب" },
+            { q: "من قال: يا نفس، ألا تقتلي تموتي؟", options: ["عبد الله بن رواحة", "خبيب بن عدي", "الزبير بن العوام", "طلحة بن عبيد الله"], a: "عبد الله بن رواحة" },
+            { q: "من وُصف بأنه لا ينام ولا يترك أحداً ينام؟", options: ["خالد بن الوليد", "سعد بن أبي وقاص", "الزبير بن العوام", "طلحة بن عبيد الله"], a: "خالد بن الوليد" },
+            { q: "من كان أدهى العرب قبل الإسلام؟", options: ["قيس بن سعد بن عبادة", "عمرو بن العاص", "معاوية بن أبي سفيان", "خالد بن الوليد"], a: "قيس بن سعد بن عبادة" },
+            { q: "من لُقب بـ شيطان الجاهلية وحواري الإسلام؟", options: ["عمير بن وهب", "أبو سفيان بن الحارث", "سهيل بن عمرو", "عتبة بن غزوان"], a: "عمير بن وهب" },
+            { q: "من كان من الحكماء وأصحاب العلم؟", options: ["أبو الدرداء", "أبي بن كعب", "زيد بن ثابت", "عبد الله بن عباس"], a: "أبو الدرداء" },
+            { q: "من وُصف بـ صقر يوم اليمامة؟", options: ["زيد بن الخطاب", "خالد بن الوليد", "طلحة بن عبيد الله", "الزبير بن العوام"], a: "زيد بن الخطاب" },
+            { q: "من لُقب بـ صقر يوم أحد؟", options: ["طلحة بن عبيد الله", "الزبير بن العوام", "خالد بن الوليد", "سعد بن أبي وقاص"], a: "طلحة بن عبيد الله" },
+            { q: "من كان حواري رسول الله؟", options: ["الزبير بن العوام", "سعد بن أبي وقاص", "طلحة بن عبيد الله", "المقداد بن عمرو"], a: "الزبير بن العوام" },
+            { q: "من هو البطل فوق الصليب؟", options: ["خبيب بن عدي", "عمير بن سعد", "زيد بن ثابت", "خالد بن سعيد"], a: "خبيب بن عدي" },
+            { q: "من وُصف بـ نسيج وحده؟", options: ["عمير بن سعد", "خبيب بن عدي", "زيد بن ثابت", "خالد بن سعيد"], a: "عمير بن سعد" },
+            { q: "من جمع القرآن في عهد الرسول؟", options: ["زيد بن ثابت", "أبي بن كعب", "عبد الله بن مسعود", "عمر بن الخطاب"], a: "زيد بن ثابت" },
+            { q: "من كان فدائياً من الرعيل الأول؟", options: ["خالد بن سعيد", "أبو عبيدة بن الجراح", "العباس بن عبد المطلب", "أبو أيوب الأنصاري"], a: "خالد بن سعيد" },
+            { q: "من كان ساقي الحرمين؟", options: ["العباس بن عبد المطلب", "أبو هريرة", "البراء بن مالك", "عتبة بن غزوان"], a: "العباس بن عبد المطلب" },
+            { q: "من كان ذاكرة عصر الوحي؟", options: ["أبو هريرة", "زيد بن ثابت", "أبي بن كعب", "عبد الله بن عباس"], a: "أبو هريرة" },
+            { q: "من قال: الله والجنة؟", options: ["البراء بن مالك", "أسيد بن خضير", "سعد بن معاذ", "ثابت بن قيس"], a: "البراء بن مالك" },
+            { q: "من كان خطيب رسول الله؟", options: ["ثابت بن قيس", "حسان بن ثابت", "عبد الرحمن بن عوف", "سعد بن عبادة"], a: "ثابت بن قيس" },
+            { q: "من كان بطل يوم السقيفة؟", options: ["أسيد بن خضير", "سعد بن معاذ", "البراء بن مالك", "عبادة بن الصامت"], a: "أسيد بن خضير" },
+            { q: "من سأل: ما يبكيك يا أبا محمد؟", options: ["عبد الرحمن بن عوف", "سعد بن أبي وقاص", "طلحة بن عبيد الله", "الزبير بن العوام"], a: "عبد الرحمن بن عوف" },
+            { q: "من أراد المشي بعرجته في الجنة؟", options: ["عمرو بن الجموح", "سعد بن معاذ", "سعد بن عبادة", "أسامة بن زيد"], a: "عمرو بن الجموح" },
+            { q: "من لُقب بـ الحب بن الحب؟", options: ["أسامة بن زيد", "عبد الرحمن بن أبي بكر", "حبيب بن زيد", "سعد بن عبادة"], a: "أسامة بن زيد" },
+            { q: "من كان بطلاً حتى النهاية؟", options: ["عبد الرحمن بن أبي بكر", "أسامة بن زيد", "حبيب بن زيد", "عبد الله بن الزبير"], a: "عبد الرحمن بن أبي بكر" },
+            { q: "من محرر مصر من الرومان؟", options: ["عمرو بن العاص", "خالد بن الوليد", "معاوية بن أبي سفيان", "عمر بن الخطاب"], a: "عمرو بن العاص" }
+        ];
+
+        // باقي الكود كما هو في النسخة السابقة
+        let currentIndex = 0;
+        let team1Score = 0;
+        let team2Score = 0;
+        let currentTeam = 1;
+        let selectedAnswer = null;
+        const TOTAL_ROUNDS = 80;  // 40 أسؤال للفريقين
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            let questionData = questions[Math.floor(currentIndex / 2)];
+            document.getElementById("question").innerText = questionData.q;
+            
+            let optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+            
+            // Shuffle options
+            let shuffledOptions = shuffleArray([...questionData.options]);
+            
+            shuffledOptions.forEach(option => {
+                let btn = document.createElement("button");
+                btn.innerText = option;
+                btn.className = "option-btn";
+                btn.onclick = () => selectAnswer(btn, option);
+                optionsDiv.appendChild(btn);
+            });
+
+            // Update current team display
+            document.getElementById("current-team").innerText = `دور الفريق ${currentTeam}`;
+
+            // Reset selected state
+            selectedAnswer = null;
+            document.getElementById("next-btn").disabled = true;
+        }
+
+        function selectAnswer(btnElement, answer) {
+            // Remove previous selections
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('correct', 'incorrect');
+            });
+
+            selectedAnswer = answer;
+            
+            if (answer === questions[Math.floor(currentIndex / 2)].a) {
+                btnElement.classList.add('correct');
+                // Add point to current team
+                if (currentTeam === 1) {
+                    team1Score++;
+                    document.getElementById("team1-score").innerText = `الفريق الأول: ${team1Score}`;
+                } else {
+                    team2Score++;
+                    document.getElementById("team2-score").innerText = `الفريق الثاني: ${team2Score}`;
+                }
+            } else {
+                btnElement.classList.add('incorrect');
+                // Highlight correct answer
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.innerText === questions[Math.floor(currentIndex / 2)].a) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            
+            // Enable next button
+            document.getElementById("next-btn").disabled = false;
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            
+            // Switch teams
+            currentTeam = currentTeam === 1 ? 2 : 1;
+
+            if (currentIndex >= TOTAL_ROUNDS) {
+                endGame();
+                return;
+            }
+
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById("quiz-section").style.display = "none";
+            document.getElementById("game-end").style.display = "flex";
+            
+            let winnerText = team1Score > team2Score ? "الفريق الأول" :
+                             team2Score > team1Score ? "الفريق الثاني" : "التعادل";
+            
+            document.getElementById("winner").innerText = `الفائز: ${winnerText}`;
+        }
+
+        function restartGame() {
+            // Reset all game states
+            currentIndex = 0;
+            team1Score = 0;
+            team2Score = 0;
+            currentTeam = 1;
+
+            // Reset score displays
+            document.getElementById("team1-score").innerText = "الفريق الأول: 0";
+            document.getElementById("team2-score").innerText = "الفريق الثاني: 0";
+
+            // Hide game end, show quiz
+            document.getElementById("game-end").style.display = "none";
+            document.getElementById("quiz-section").style.display = "block";
+
+            // Load first question
+            loadQuestion();
+        }
+
+        // Initialize the first question
+        loadQuestion();
+    </script>
+</body>
+</html>
